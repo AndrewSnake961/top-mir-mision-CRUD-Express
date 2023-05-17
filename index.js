@@ -15,6 +15,8 @@
 const express = require("express");
 const app = express();
 
+app.use(express.json());
+
 let notes = [
   {
     id: "1",
@@ -65,6 +67,40 @@ app.get("/notes/:id", (req, res, next) => {
       message: `Note with ${id}, Not Found`,
     });
   }
+});
+
+//3. Post (Se envía el body)
+app.post("/notes", (req, res) => {
+  const { body } = req;
+  notes.push(body);
+  res.status(201).json(body);
+});
+
+//4. Put (Se envía el body)
+app.put("/notes/:id", (req, res) => {
+  const { id } = req.params;
+  const { content } = req.body;
+  const note = notes.find((note) => note.id === id);
+
+  if (!note) {
+    return res.status(404).json({ message: "Note not found" });
+  }
+
+  note.content = content;
+  res.json(note);
+});
+
+//5. Delete
+app.delete("/notes/:id", (req, res) => {
+  const { id } = req.params;
+  const index = notes.findIndex((note) => note.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ message: "Note not found" });
+  }
+
+  notes.splice(index, 1);
+  res.sendStatus(204);
 });
 
 app.use((req, res, next) => {
